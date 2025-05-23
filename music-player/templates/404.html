@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MusicFlow - Главная</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<header>
+  <div class="logo">MusicFlow</div>
+  {% if header_type %}
+  <!-- Контент для валидной сессии -->
+  <nav>
+    <a href="/" class="nav-link">Главная</a>
+    <a href="/profil" class="nav-link">Профиль</a>
+    <a href="/upload" class="nav-link">Загрузить</a>
+  </nav>
+  {% else %}
+  <!-- Контент для невалидной/гостевой сессии -->
+  <nav>
+    <a href="/" class="nav-link">Главная</a>
+    <a href="/login" class="nav-link">Войти</a>
+    <a href="/register" class="nav-link">Создать</a>
+  </nav>
+  {% endif %}
+</header>
+
+  <div class="error-404">
+    <h1 class="glitch">404</h1>
+    <p style="margin-bottom: 2em">Страница потерялась в ритме</p>
+    <a href="/" class="filter-pill active" style="color: white; text-decoration: none;">Вернуться на главную</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicFlow - Загрузка трека</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">MusicFlow</div>
+    <nav>
+        <a href="/" class="nav-link">Главная</a>
+        <a href="/profil" class="nav-link">Профиль</a>
+        <a href="/upload" class="nav-link active">Загрузить</a>
+    </nav>
+</header>
+
+<main class="upload-main">
+    <div class="upload-container">
+        <div class="upload-form">
+            <!-- Область загрузки -->
+            <div class="upload-areas">
+                <!-- Для аудио -->
+                <div class="upload-area" id="audioDropZone">
+                    <div class="drop-content">
+                        <i class="fas fa-file-audio fa-3x"></i>
+                        <h3>Перетащите аудиофайл</h3>
+                        <div class="file-info" id="audioFileInfo"></div>
+                        <input name="audio" type="file" id="audioInput" accept="audio/*" hidden>
+                    </div>
+                </div>
+
+                <!-- Для изображения -->
+                <div class="upload-area" id="imageDropZone">
+                    <div class="drop-content">
+                        <span id="imagePreview"><i class="fas fa-image fa-3x"></i></span>
+                        <h3>Перетащите обложку</h3>
+                        <div class="file-info" id="imageFileInfo"></div>
+
+                        <input name="img" type="file" id="imageInput" accept="image/*" hidden>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Метаданные -->
+            <div class="meta-section">
+                <div class="form-group">
+                    <input id="text" type="text" required>
+                    <label>Название</label>
+                </div>
+                <div class="form-group">
+                    <input id="de" type="text" required>
+                    <label>Описание трека</label>
+                </div>
+            </div>
+
+            <!-- Карусель альбомов -->
+            <div class="albums-carousel-container">
+                <button class="carousel-nav-btn prev"
+                        onclick="document.getElementById('albumsCarousel').scrollBy({left: -324, behavior: 'smooth'})">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+
+                <div class="albums-carousel" id="albumsCarousel">
+                </div>
+
+                <button class="carousel-nav-btn next"
+                        onclick="document.getElementById('albumsCarousel').scrollBy({left: 324, behavior: 'smooth'})">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <button type="submit" class="submit-btn" onclick="upload_music_post()">
+                <i class="fas fa-cloud-upload-alt"></i> Опубликовать трек
+            </button>
+        </div>
+    </div>
+</main>
+
+<script>
+    function button_album2(img, music, name, artist, id) {
+    return `
+    <div class="album-card" onclick="toggleAlbum(this)">
+        <div class="album-art">
+            <div class="wave-animation">${id}</div>
+            <img src="/api/cover/${img}" loading="lazy" alt="" style="z-index: 10">
+        </div>
+        <h3 style="margin: 0.5em">${name}</h3>
+        <p class="artist" style="margin: 0.5em">${artist}</p>
+        <p class="album-meta" style="margin: 0.5em;font-size: 80%;padding-left: 0.1em;">${music} треков</p>
+    </div>
+    `
+}
+    function ooo() {
+        let url = document.location['origin'] + '/api/album/';
+        let j = {{ name }};
+        let y = document.getElementById('albumsCarousel')
+        function iu(data, d) {
+            console.log(data);
+            console.log(data['img']);
+            console.log(data['music']);
+            console.log(data['music'].length);
+            console.log(data['name']);
+            console.log(data['author']);
+            console.log(data['id']);
+            let uy = button_album2(data['img'], String(data['music'].length), data['name'], data['author'], data['id']);
+            console.log(uy);
+            d.innerHTML = d.innerHTML+uy
+
+        }
+        for (let i = 0; i<j.length; i++) {
+            fetch(url+j[i])
+                .then((response) => response.json())
+                .then((data) => {
+                        iu(data, y);
+                    }
+                );
+        }
+    }
+
+    const initFileUpload = (dropZoneId, inputId, infoId, previewId = null) => {
+        const dropZone = document.getElementById(dropZoneId);
+        const fileInput = document.getElementById(inputId);
+        const fileInfo = document.getElementById(infoId);
+        const preview = previewId ? document.getElementById(previewId) : null;
+
+        const handleFile = (file) => {
+            // Отображение имени файла
+            fileInfo.textContent = file.name;
+        };
+
+        // Обработчики событий
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        ['dragleave', 'drop'].forEach(event => {
+            dropZone.addEventListener(event, () => {
+                dropZone.classList.remove('dragover');
+            });
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                fileInput.files = e.dataTransfer.files;
+                handleFile(file);
+            }
+        });
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleFile(file);
+        });
+    };
+
+    // Инициализация загрузчиков
+    document.addEventListener('DOMContentLoaded', () => {
+        initFileUpload('audioDropZone', 'audioInput', 'audioFileInfo');
+        initFileUpload('imageDropZone', 'imageInput', 'imageFileInfo', 'imagePreview');
+    });
+    // Drag and Drop
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+
+
+    // Выбор альбома
+    function toggleAlbum(card) {
+        card.classList.toggle('selected');
+    }
+
+
+    // Обработка файлов
+    function handleFiles(files) {
+        const audioFiles = Array.from(files).filter(file =>
+            file.type.startsWith('audio/')
+        );
+
+        if (audioFiles.length > 0) {
+            // Реализуйте загрузку файла
+            console.log('Начата загрузка:', audioFiles[0].name);
+        }
+    }
+</script>
+<script>
+    function upload_music_post() {
+        let url = document.location['origin'] + '/api/upload';
+
+        let h = '';
+        let l = document.getElementsByClassName('album-card selected');
+        for (let i = 0; i < l.length; i++) {
+            h = h + ':' + l[i].getElementsByClassName('wave-animation')[0].innerText;
+        }
+
+
+        const formData = new FormData();
+        // Замените 'file' на атрибут name вашего элемента input
+        formData.append('image', document.getElementById('imageInput').files[0]);
+        formData.append('audio', document.getElementById('audioInput').files[0]);
+        formData.append('text', document.getElementById('text').value);
+        formData.append('description', document.getElementById('de').value);
+        formData.append('album', h);
+        let ui = {
+            method: 'POST',
+
+            body: formData
+
+        };
+
+        function iu(data) {
+            console.log(data);
+
+        }
+
+        fetch(url, ui)
+            .then(response => response.json())
+            .then((data) => {
+                    iu(data['result'])
+                }
+            );
+    }
+    ooo();
+</script>
+</body>
+</html>

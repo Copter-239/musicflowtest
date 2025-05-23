@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicFlow - Профиль</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Стили для профиля */
+        .profile-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--dark-secondary);
+            border-radius: 20px;
+        }
+
+        .avatar-section {
+            text-align: center;
+            position: relative;
+        }
+
+        .avatar-upload {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto;
+            border: 3px dashed var(--primary);
+            cursor: pointer;
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+
+        .avatar-upload:hover {
+            transform: scale(1.05);
+            border-color: #1ed760;
+        }
+
+        .avatar-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .create-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .create-btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 30px;
+            background: var(--primary);
+            color: #000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.3s;
+        }
+
+        .create-btn:hover {
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">MusicFlow</div>
+    <nav>
+        <a href="/" class="nav-link">Главная</a>
+        <a href="/profil" class="nav-link active">Профиль</a>
+        <a href="/upload" class="nav-link">Загрузить</a>
+    </nav>
+</header>
+
+    <main class="profile-container">
+        <!-- Профиль артиста -->
+        <section class="artist-header">
+            <div class="avatar-section">
+            <div class="avatar-upload" id="avatarUpload">
+                <img src="default.jpg" onerror="this.onerror=null; this.classList.add('default-avatar')">
+                <input type="file" id="avatarInput" accept="image/*" hidden>
+            </div>
+            <h1>Ваш профиль</h1>
+        </div>
+            <div class="artist-info">
+                <h1 class="artist-name">Электронный Лис</h1>
+                <div class="artist-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">1.2M</span>
+                        <span class="stat-label">Слушателей</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">45</span>
+                        <span class="stat-label">Треков</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">3.8M</span>
+                        <span class="stat-label">Прослушиваний</span>
+                    </div>
+                </div>
+                <button class="follow-btn"><i class="fas fa-plus"></i> Подписаться</button>
+            </div>
+        </section>
+
+        <!-- Навигация -->
+        <nav class="profile-nav">
+            <button class="nav-btn active"><i class="fas fa-music"></i> Треки</button>
+            <button class="nav-btn"><i class="fas fa-compact-disc"></i> Альбомы</button>
+            <button class="nav-btn"><i class="fas fa-heart"></i> Плейлисты</button>
+            <button class="nav-btn"><i class="fas fa-users"></i> Подписчики</button>
+        </nav>
+
+        <!-- Сетка треков -->
+        <section class="content-grid">
+            <div class="song-card">
+                <div class="album-art" style="background-image: url('track1.jpg')">
+                    <div class="play-overlay"><i class="fas fa-play"></i></div>
+                </div>
+                <h3 class="song-title">Лунная соната 3000</h3>
+                <p class="artist">Электронный Лис</p>
+                <div class="track-stats">
+                    <span><i class="fas fa-play"></i> 245K</span>
+                    <span><i class="fas fa-heart"></i> 18K</span>
+                </div>
+            </div>
+            <!-- Повторить другие карточки -->
+        </section>
+    </main>
+<script>
+        // Drag & Drop для аватара
+        const avatarUpload = document.getElementById('avatarUpload');
+        const avatarInput = document.getElementById('avatarInput');
+        const avatarPreview = document.getElementById('avatarPreview');
+
+        avatarUpload.addEventListener('click', () => avatarInput.click());
+
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    avatarPreview.src = e.target.result;
+                    // Отправка на сервер
+                    uploadAvatar(file);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Загрузка на сервер (пример)
+        async function uploadAvatar(file) {
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            try {
+                const response = await fetch('/api/upload-avatar', {
+                    method: 'POST',
+                    body: formData
+                });
+                console.log('Аватар обновлён!');
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+            }
+        }
+    </script>
+</body>
+</html>
